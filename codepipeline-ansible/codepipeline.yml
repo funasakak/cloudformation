@@ -1,0 +1,283 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Ansible playbook run by Codebuild and Codepipeline
+
+Parameters:
+  PipelineName:
+    Type: String
+    Default: ansible-playbooks-pipe
+    Description: CodeCommit Repository Name
+  RepositoryName:
+    Type: String
+    Default: ansible-playbooks-repo
+    Description: CodeCommit Repository Name
+  BuildProjectName:
+    Type: String
+    Default: ansible-playbooks-prj
+    Description: CodeBuild Project Name
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: vpcid where codebuild is running
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: subnetid where codebuild is running
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: securitygroup associated with codebuild
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: CodePipeline
+        Parameters:
+          - PipelineName
+      - Label:
+          default: CodeCommit
+        Parameters:
+          - RepositoryName
+      - Label:
+          default: CodeBuild
+        Parameters:
+          - BuildProjectName
+          - VpcId
+          - SubnetId
+          - SecurityGroupId
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+  CodeBuildBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+  CodeCommitRepo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SSMParameterStore
+                Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource:
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/CodeBuild/*
+              - Sid: CloudWatchLogsAccess
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              - Sid: S3Access
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactStoreBucket}
+                  - !Sub arn:aws:s3:::${ArtifactStoreBucket}/*
+                  - !Sub arn:aws:s3:::${CodeBuildBucket}
+                  - !Sub arn:aws:s3:::${CodeBuildBucket}/*
+              - Sid: EC2
+                Effect: Allow
+                Action: 
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeInstances
+                  - ec2:DescribeTags
+                Resource: "*"
+              - Sid: CreateNetworkInterface
+                Effect: Allow
+                Action: 
+                  - ec2:CreateNetworkInterfacePermission
+                Resource: 
+                  - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
+                Condition: 
+                  StringEquals:
+                     ec2:AuthorizedService: codebuild.amazonaws.com
+                     ec2:Subnet: 
+                        !Join
+                          - ''
+                          - - 'arn:aws:ec2:'
+                            - !Ref 'AWS::Region'
+                            - ':'
+                            - !Ref 'AWS::AccountId'
+                            - ':subnet/'
+                            - !Ref 'SubnetId'
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref BuildProjectName
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: CODEPIPELINE
+      BadgeEnabled: 'false'
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-python-2.7-amazonlinux-64:2.1.6
+        EnvironmentVariables:
+          - Name: Owner
+            Value: InfraTeam
+#          - Name: varName2
+#            Value: varValue2
+#            Type: PLAINTEXT
+#          - Name: varName3
+#            Value: /CodeBuild/testParameter
+#            Type: PARAMETER_STORE
+      Source:
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 60
+      VpcConfig:
+        VpcId: !Ref VpcId
+        Subnets: [!Ref SubnetId]
+        SecurityGroupIds: [!Ref SecurityGroupId]
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3FullAccess
+                Effect: Allow
+                Action: s3:*
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactStoreBucket}
+                  - !Sub arn:aws:s3:::${ArtifactStoreBucket}/*
+              - Sid: FullAccess
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+              - Sid: CodeBuildAccess
+                Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: !GetAtt CodeBuildProject.Arn
+              - Sid: CodeCommitAccess
+                Effect: Allow
+                Action:
+                  - codecommit:CancelUploadArchive
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:UploadArchive
+                Resource: !Join
+                           - ''
+                           - - 'arn:aws:codecommit:'
+                             - !Ref 'AWS::Region'
+                             - ':'
+                             - !Ref 'AWS::AccountId'
+                             - ':'
+                             - !Ref 'RepositoryName'
+              - Sid: Cloudwatch
+                Effect: Allow
+                Action:
+                  - cloudwatch:*
+                Resource: "*"
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref PipelineName
+      RoleArn: !GetAtt PipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactStoreBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: download-source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: CodeCommit
+              Configuration:
+                RepositoryName: !GetAtt CodeCommitRepo.Name
+                BranchName: master
+              OutputArtifacts:
+                - Name: SourceOutput
+        - Name: Build
+          Actions:
+            - InputArtifacts:
+                - Name: SourceOutput
+              Name: RunPlaybook
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: TestOutput
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+
+  CodeCommitPushEventRule: 
+    Type: "AWS::Events::Rule"
+    Properties: 
+      Description: "codecommit push event"
+      EventPattern: 
+        source:
+          - "aws.codecommit"
+        detail-type: 
+          - "CodeCommit Repository State Change"
+        resources:
+          - 
+            !GetAtt CodeCommitRepo.Arn
+        detail: 
+          event:
+            - referenceCreated
+            - referenceUpdated
+          referenceType:
+            - branch
+          referenceName:
+            - master
+      State: "ENABLED"
+      Targets: 
+        - Arn: !Join
+            - ''
+            - - 'arn:aws:codepipeline:'
+              - !Ref 'AWS::Region'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':'
+              - !Ref 'PipelineName'
+          RoleArn: !GetAtt PipelineRole.Arn
+          Id: !Ref PipelineName
