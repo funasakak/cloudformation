@@ -1,0 +1,475 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: VPC CloudFormation
+
+Parameters:
+  VPCCidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+
+  PublicSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet in AZ-a(eg 10.0.0.0/24)
+
+  PublicSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet in AZ-c (eg 10.0.1.0/24)
+
+  PrivateSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet in AZ-a (eg 10.0.10.0/24)
+
+  PrivateSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet in AZ-c (eg 10.0.11.0/24)
+
+  ProtectedSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet in AZ-a (eg 10.0.20.0/24)
+
+  ProtectedSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet in AZ-c (eg 10.0.21.0/24)
+
+  SwvpnSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Swvpn Subnet in AZ-a (eg 10.0.30.0/24)
+
+  SwvpnSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Swvpn Subnet in AZ-c (eg 10.0.31.0/24)
+    
+  HwvpnSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Hwvpn Subnet in AZ-a (eg 10.0.40.0/24)
+
+  HwvpnSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Hwvpn Subnet in AZ-c (eg 10.0.41.0/24)
+
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Network Configuration"
+        Parameters:
+          - VPCCidrBlock
+          - PublicSubnet0CidrBlock
+          - PublicSubnet1CidrBlock
+          - PrivateSubnet0CidrBlock
+          - PrivateSubnet1CidrBlock
+          - ProtectedSubnet0CidrBlock
+          - ProtectedSubnet1CidrBlock
+          - SwvpnSubnet0CidrBlock
+          - SwvpnSubnet1CidrBlock
+          - HwvpnSubnet0CidrBlock
+          - HwvpnSubnet1CidrBlock
+
+          
+Resources:
+
+  ProdVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      InstanceTenancy: default
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: vpc-com-tky-prd-001
+
+  PublicSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pub
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pub
+
+  PrivateSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pri
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pri
+
+  ProtectedSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pro
+
+  ProtectedSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pro
+
+
+  SwvpnSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SwvpnSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-svp
+
+  SwvpnSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SwvpnSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-svp
+
+  HwvpnSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref HwvpnSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-hvp
+
+  HwvpnSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref HwvpnSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-hvp
+
+  ProdPublicRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pub
+
+  ProdPublicRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pub
+
+  ProdPrivateRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pri
+
+  ProdPrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pri
+
+  ProdProtectedRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pro
+
+  ProdProtectedRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pro
+
+  ProdSwvpnRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-svp
+
+  ProdSwvpnRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-svp
+
+  ProdHwvpnRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-hvp
+
+  ProdHwvpnRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-hvp
+
+  PublicRoute0:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable0
+      GatewayId: !Ref ProdIGW
+
+  PublicRoute1:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable1
+      GatewayId: !Ref ProdIGW
+
+  PrivateRoute0:
+    DependsOn: ProdNATGW10
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable0
+      NatGatewayId: !Ref ProdNATGW10
+
+  PrivateRoute1:
+    DependsOn: ProdNATGW11
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable1
+      NatGatewayId: !Ref ProdNATGW11
+
+  SwvpnRoute0:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdSwvpnRouteTable0
+      GatewayId: !Ref ProdIGW
+
+  SwvpnRoute1:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdSwvpnRouteTable1
+      GatewayId: !Ref ProdIGW
+
+  HwvpnRoute0:
+    DependsOn: ProdNATGW10
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdHwvpnRouteTable0
+      NatGatewayId: !Ref ProdNATGW10
+
+  HwvpnRoute1:
+    DependsOn: ProdNATGW11
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdHwvpnRouteTable1
+      NatGatewayId: !Ref ProdNATGW11
+
+  ProdNATGW10:
+    DependsOn: EIP10
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP10
+        - AllocationId
+      SubnetId: !Ref PublicSubnet0
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-prd-a001
+
+  ProdNATGW11:
+    DependsOn: EIP11
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP11
+        - AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-prd-c001
+
+  EIP10:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  EIP11:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  PublicSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable0
+      SubnetId: !Ref PublicSubnet0
+
+  PublicSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+
+  PrivateSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable0
+      SubnetId: !Ref PrivateSubnet0
+
+  PrivateSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  ProtectedSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable0
+      SubnetId: !Ref ProtectedSubnet0
+
+  ProtectedSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable1
+      SubnetId: !Ref ProtectedSubnet1
+
+  SwvpnSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdSwvpnRouteTable0
+      SubnetId: !Ref SwvpnSubnet0
+
+  SwvpnSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdSwvpnRouteTable1
+      SubnetId: !Ref SwvpnSubnet1
+
+  HwvpnSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdHwvpnRouteTable0
+      SubnetId: !Ref HwvpnSubnet0
+
+  HwvpnSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdHwvpnRouteTable1
+      SubnetId: !Ref HwvpnSubnet1
+
+  ProdIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: igw-com-tky-prd-001
+
+  GWAttachment0:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref ProdVPC
+      InternetGatewayId: !Ref ProdIGW
+
+Outputs:
+  VpcId:
+    Description: The ID of VPC
+    Value: !Ref ProdVPC
+    Export:
+      Name: vpc-com-tky-prd-001
+
