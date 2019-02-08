@@ -1,0 +1,1417 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: VPC CloudFormation
+
+Parameters:
+  VPCCidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+
+  PublicSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet in AZ-a(eg 10.0.0.0/24)
+
+  PublicSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet in AZ-c (eg 10.0.1.0/24)
+
+  PrivateSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet in AZ-a (eg 10.0.10.0/24)
+
+  PrivateSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet in AZ-c (eg 10.0.11.0/24)
+
+  ProtectedSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet in AZ-a (eg 10.0.20.0/24)
+
+  ProtectedSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet in AZ-c (eg 10.0.21.0/24)
+
+  SwvpnSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Swvpn Subnet in AZ-a (eg 10.0.30.0/24)
+
+  SwvpnSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Swvpn Subnet in AZ-c (eg 10.0.31.0/24)
+    
+  HwvpnSubnet0CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Hwvpn Subnet in AZ-a (eg 10.0.40.0/24)
+
+  HwvpnSubnet1CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Hwvpn Subnet in AZ-c (eg 10.0.41.0/24)
+
+  PublicSubnet2CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet for Verification Env in AZ-a(eg 10.0.50.0/24)
+
+  PublicSubnet3CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Public Subnet for Verification Env in AZ-c (eg 10.0.51.0/24)
+
+  PrivateSubnet2CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet for Verification Env in AZ-a (eg 10.0.60.0/24)
+
+  PrivateSubnet3CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Private Subnet for Verification Env in AZ-c (eg 10.0.61.0/24)
+
+  ProtectedSubnet2CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet for Verification Env in AZ-a (eg 10.0.70.0/24)
+
+  ProtectedSubnet3CidrBlock:
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Description: VPC CIDR Block for the Protected Subnet for Verification Env in AZ-c (eg 10.0.71.0/24)
+
+  TagOwner:
+    Type: String
+    Description: Owner Tag
+    
+  TagSystem:
+    Type: String
+    Description: System Tag
+
+  TagRegion:
+    Type: String
+    Default: Tokyo
+    Description: Region Tag
+    
+  TagEnvironment:
+    Type: String
+    Default: Production
+    Description: Environment Tag
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Network Configurations"
+        Parameters:
+          - VPCCidrBlock
+          - PublicSubnet0CidrBlock
+          - PublicSubnet1CidrBlock
+          - PrivateSubnet0CidrBlock
+          - PrivateSubnet1CidrBlock
+          - ProtectedSubnet0CidrBlock
+          - ProtectedSubnet1CidrBlock
+          - SwvpnSubnet0CidrBlock
+          - SwvpnSubnet1CidrBlock
+          - HwvpnSubnet0CidrBlock
+          - HwvpnSubnet1CidrBlock
+          - PublicSubnet2CidrBlock
+          - PublicSubnet3CidrBlock
+          - PrivateSubnet2CidrBlock
+          - PrivateSubnet3CidrBlock
+          - ProtectedSubnet2CidrBlock
+          - ProtectedSubnet3CidrBlock
+      -
+        Label:
+          default: "Tag Configurations"
+        Parameters:
+          - TagOwner
+          - TagSystem
+          - TagRegion
+          - TagEnvironment
+          
+Resources:
+
+  ProdVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      InstanceTenancy: default
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: vpc-com-tky-prd-001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  PublicSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  PrivateSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProtectedSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProtectedSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  SwvpnSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SwvpnSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  SwvpnSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SwvpnSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  HwvpnSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref HwvpnSubnet0CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-a-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  HwvpnSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref HwvpnSubnet1CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-prd-c-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet2CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet3CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet2CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet3CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProtectedSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet2CidrBlock
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProtectedSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ProtectedSubnet3CidrBlock
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: sub-com-tky-ver-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+
+
+  ProdPublicRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdPublicRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdPrivateRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdPrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdProtectedRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdProtectedRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdSwvpnRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdSwvpnRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdHwvpnRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-a-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdHwvpnRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-prd-c-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  ProdPublicRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProdPublicRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProdPrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProdPrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProdProtectedRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  ProdProtectedRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: rt-com-tky-ver-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+
+  PublicNetworkAcl0:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PublicNetworkAcl1:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PrivateNetworkAcl0:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PrivateNetworkAcl1:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+
+  ProtectedNetworkAcl0:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  ProtectedNetworkAcl1:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  SwvpnNetworkAcl0:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-a-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  SwvpnNetworkAcl1:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-c-svp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  HwvpnNetworkAcl0:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-a-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  HwvpnNetworkAcl1:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-prd-c-hvp
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PublicNetworkAcl2:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-a-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PublicNetworkAcl3:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-c-pub
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PrivateNetworkAcl2:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-a-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  PrivateNetworkAcl3:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-c-pri
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+
+  ProtectedNetworkAcl2:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-a-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  ProtectedNetworkAcl3:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref ProdVPC
+      Tags:
+        - Key: Name
+          Value: nacl-com-tky-ver-c-pro
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+
+  PublicNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet0
+      NetworkAclId: !Ref PublicNetworkAcl0
+
+  PublicNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !Ref PublicNetworkAcl1
+
+  PrivateNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet0
+      NetworkAclId: !Ref PrivateNetworkAcl0
+
+  PrivateNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      NetworkAclId: !Ref PrivateNetworkAcl1
+
+  ProtectedNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref ProtectedSubnet0
+      NetworkAclId: !Ref ProtectedNetworkAcl0
+
+  ProtectedNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref ProtectedSubnet1
+      NetworkAclId: !Ref ProtectedNetworkAcl1
+
+  SwvpnNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref SwvpnSubnet0
+      NetworkAclId: !Ref SwvpnNetworkAcl0
+
+  SwvpnNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref SwvpnSubnet1
+      NetworkAclId: !Ref SwvpnNetworkAcl1
+
+  HwvpnNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref HwvpnSubnet0
+      NetworkAclId: !Ref HwvpnNetworkAcl0
+
+  HwvpnNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref HwvpnSubnet1
+      NetworkAclId: !Ref HwvpnNetworkAcl1
+
+  PublicNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      NetworkAclId: !Ref PublicNetworkAcl2
+
+  PublicNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      NetworkAclId: !Ref PublicNetworkAcl3
+
+  PrivateNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      NetworkAclId: !Ref PrivateNetworkAcl2
+
+  PrivateNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet3
+      NetworkAclId: !Ref PrivateNetworkAcl3
+
+  ProtectedNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref ProtectedSubnet2
+      NetworkAclId: !Ref ProtectedNetworkAcl2
+
+  ProtectedNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref ProtectedSubnet3
+      NetworkAclId: !Ref ProtectedNetworkAcl3
+
+  PublicRoute0:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable0
+      GatewayId: !Ref ProdIGW
+
+  PublicRoute1:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable1
+      GatewayId: !Ref ProdIGW
+
+  PrivateRoute0:
+    DependsOn: ProdNATGW10
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable0
+      NatGatewayId: !Ref ProdNATGW10
+
+  PrivateRoute1:
+    DependsOn: ProdNATGW11
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable1
+      NatGatewayId: !Ref ProdNATGW11
+
+  PublicRoute2:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable2
+      GatewayId: !Ref ProdIGW
+
+  PublicRoute3:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPublicRouteTable3
+      GatewayId: !Ref ProdIGW
+
+  PrivateRoute2:
+    DependsOn: VerifyNATGW12
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable2
+      NatGatewayId: !Ref VerifyNATGW12
+
+  PrivateRoute3:
+    DependsOn: VerifyNATGW13
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdPrivateRouteTable3
+      NatGatewayId: !Ref VerifyNATGW13
+
+  SwvpnRoute0:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdSwvpnRouteTable0
+      GatewayId: !Ref ProdIGW
+
+  SwvpnRoute1:
+    DependsOn: GWAttachment0
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdSwvpnRouteTable1
+      GatewayId: !Ref ProdIGW
+
+  HwvpnRoute0:
+    DependsOn: ProdNATGW10
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdHwvpnRouteTable0
+      NatGatewayId: !Ref ProdNATGW10
+
+  HwvpnRoute1:
+    DependsOn: ProdNATGW11
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref ProdHwvpnRouteTable1
+      NatGatewayId: !Ref ProdNATGW11
+
+  ProdNATGW10:
+    DependsOn: EIP10
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP10
+        - AllocationId
+      SubnetId: !Ref PublicSubnet0
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-prd-a001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  ProdNATGW11:
+    DependsOn: EIP11
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP11
+        - AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-prd-c001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+          
+  VerifyNATGW12:
+    DependsOn: EIP12
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP12
+        - AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-ver-a001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+          
+  VerifyNATGW13:
+    DependsOn: EIP13
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP13
+        - AllocationId
+      SubnetId: !Ref PublicSubnet3
+      Tags:
+        - Key: Name
+          Value: ngw-com-tky-ver-c001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: Verification
+
+  EIP10:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  EIP11:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  EIP12:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  EIP13:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  PublicSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable0
+      SubnetId: !Ref PublicSubnet0
+
+  PublicSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+
+  PrivateSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable0
+      SubnetId: !Ref PrivateSubnet0
+
+  PrivateSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  ProtectedSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable0
+      SubnetId: !Ref ProtectedSubnet0
+
+  ProtectedSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable1
+      SubnetId: !Ref ProtectedSubnet1
+
+  SwvpnSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdSwvpnRouteTable0
+      SubnetId: !Ref SwvpnSubnet0
+
+  SwvpnSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdSwvpnRouteTable1
+      SubnetId: !Ref SwvpnSubnet1
+
+  HwvpnSubnetRouteAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdHwvpnRouteTable0
+      SubnetId: !Ref HwvpnSubnet0
+
+  HwvpnSubnetRouteAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdHwvpnRouteTable1
+      SubnetId: !Ref HwvpnSubnet1
+
+  PublicSubnetRouteAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable2
+      SubnetId: !Ref PublicSubnet2
+
+  PublicSubnetRouteAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPublicRouteTable3
+      SubnetId: !Ref PublicSubnet3
+
+  PrivateSubnetRouteAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+
+  PrivateSubnetRouteAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdPrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
+
+  ProtectedSubnetRouteAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable2
+      SubnetId: !Ref ProtectedSubnet2
+
+  ProtectedSubnetRouteAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref ProdProtectedRouteTable3
+      SubnetId: !Ref ProtectedSubnet3
+
+  ProdIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: igw-com-tky-prd-001
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: System
+          Value: !Ref TagSystem
+        - Key: Region
+          Value: !Ref TagRegion
+        - Key: Environment
+          Value: !Ref TagEnvironment
+
+  GWAttachment0:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref ProdVPC
+      InternetGatewayId: !Ref ProdIGW
+
+Outputs:
+  VpcId:
+    Description: The ID of VPC
+    Value: !Ref ProdVPC
+    Export:
+      Name: vpc-com-tky-prd-001
